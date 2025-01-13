@@ -1,0 +1,13 @@
+Constraint,Apply
+No2QueensInRow,1
+No2QueensInColumn,1
+No2QueensInTopDownDiag,1
+No2QueensInBottomUpDiag,1
+NumOfQueens,1
+,,
+Criterion,Apply,Goal
+NumOfQueens,1,max
+,,
+Solver,Apply
+SCIP,1
+Gurobi,0
