@@ -1,4 +1,5 @@
 Constraint,Apply
+No2QueensInL,1
 No2QueensInRow,1
 No2QueensInColumn,1
 No2QueensInTopDownDiag,1

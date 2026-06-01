@@ -1,26 +1,14 @@
-###############################################################################
-# Queens.py
-###############################################################################
-
 import sys
 import csv
 from datetime import datetime
 import copy
 import math
+import itertools
 from ortools.linear_solver import pywraplp
   
 abc = ["a","b","c","d","e","f","g","h"]
 
-#==============================================================================
-# Class Queens. 
-#==============================================================================
-
 class Queens:
-
-	#--------------------------------------------------------------------------
-	# Queens: Constructor
-	#--------------------------------------------------------------------------
-
 	def __init__(self,fileNameIn,fileNameConfig,fileNameOut):
 		self.fileNameIn  = fileNameIn	# (in) input data file name
 		self.fileNameConfig = fileNameConfig	# (in) configuration file name          
@@ -28,11 +16,6 @@ class Queens:
 		self.n = 0			            # (in) board size
 		self.config = {}                # (in) configuration dictionary        
 
-	#--------------------------------------------------------------------------
-	# Queens: Read the Config file Config.csv
-    #          e.g. C:\Projects\Queens\Problems\p001\Config.csv
-	#--------------------------------------------------------------------------
-	
 	def ReadConfig(self,traceFile):
 		t = str(datetime.now())
 		traceFile.write(t + " ReadConfig " + self.fileNameConfig + "\n")
@@ -75,11 +58,6 @@ class Queens:
 		traceFile.write("...read " + str(rowCount) + " lines.\n")
         
 		return True
-
-	#--------------------------------------------------------------------------
-	# Queens: Read the input file Input.csv
-    #          e.g. C:\Projects\Queens\Problems\p001\Input.csv
-	#--------------------------------------------------------------------------
 	
 	def ReadInput(self,traceFile):
 		t = str(datetime.now())
@@ -109,40 +87,20 @@ class Queens:
 		traceFile.write("...read " + str(rowCount) + " lines.\n") 
 		return True
 
-	#--------------------------------------------------------------------------
-	# Queens: Print input data.
-	#--------------------------------------------------------------------------
-
 	def PrintInput(self):  
 		print("boardSize=", self.n )
             
-	#--------------------------------------------------------------------------
-	# Queens: Print config data.
-	#--------------------------------------------------------------------------
-
 	def PrintConfig(self): 
 		print(self.config)
-                        
-	#--------------------------------------------------------------------------
-    # Queens: RunModel. It is a function
- 	#--------------------------------------------------------------------------
-    
+
 	def RunModel(self,traceFile ): 
     
 		traceFile.write("Running Model.\n")  
         
-        #----------------------------------------------------------------------     
-        # Create the MIP solver.
-        #----------------------------------------------------------------------
-
 		solverName = self.config["Solver"]
 		print("Solver = ", solverName)        
-		solver = pywraplp.Solver.CreateSolver(solverName)
-        
-        #----------------------------------------------------------------------
-        # Create the variables.
-        #----------------------------------------------------------------------
-        
+		solver: pywraplp.Solver = pywraplp.Solver.CreateSolver(solverName)
+           
         # Create binary variables x[k] ~ x[i,j](squares of a board)
 		x = [] 
 		xInd = {}
@@ -162,24 +120,29 @@ class Queens:
         #----------------------------------------------------------------------
         
 		cstr = []
+		l_steps = [[2, -1], [2, 1], [-2, -1], [-2, 1], [-1, 2], [1, 2], [-1, -2], [1, -2]]
  
 		for constraint in self.config["Constraint"]:
- 
-        #----------------------------------------------------------------------
-        # No two queens are in the same row
-        #----------------------------------------------------------------------
-        
+
+			if constraint == "No2QueensInL":
+				for i, j in itertools.product(range(self.n), range(self.n)):
+					cstr.append(solver.Constraint(0, 8, "No2QueensInL"))
+					k = xInd[i][j]
+					cstr[-1].SetCoefficient(x[k], 8)
+					for step in l_steps:
+						next_i = i + step[0]
+						next_j = j + step[1]
+						if (next_i < self.n) and (next_i >=0) and (next_j < self.n) and (next_j >=0):
+							k = xInd[next_i][next_j]
+							cstr[-1].SetCoefficient(x[k], 1)
+  
 			if constraint == "No2QueensInRow":		
 				for i in range(self.n):
 					cstr.append(solver.Constraint(0,1,'No2QueensInRow'))
 					for j in range(self.n):
 						k = xInd[i][j]
 						cstr[-1].SetCoefficient(x[k],1)
-                        
-        #----------------------------------------------------------------------
-        # No two queens are in the same column
-        #----------------------------------------------------------------------
-        
+
 			if constraint == "No2QueensInColumn":		
 				for j in range(self.n):
 					cstr.append(solver.Constraint(0,1,'No2QueensInColumn'))
@@ -187,10 +150,6 @@ class Queens:
 						k = xInd[i][j]
 						cstr[-1].SetCoefficient(x[k],1)
  
-        #----------------------------------------------------------------------
-        # No two queens are in the same top-down diagonal
-        #----------------------------------------------------------------------
-        
 			if constraint == "No2QueensInTopDownDiag":	
 				for k in range(1,2*self.n-2):
 					cstr.append(solver.Constraint(0,1,'No2QueensTopDownDiag'))
@@ -199,11 +158,7 @@ class Queens:
 						if(j < self.n) and (j >=0):
 							l = xInd[i][j]
 							cstr[-1].SetCoefficient(x[l],1)
- 
-        #----------------------------------------------------------------------
-        # No two queens are the same bottom-up diagonal
-        #----------------------------------------------------------------------
-        
+  
 			if constraint == "No2QueensInBottomUpDiag":	
 				for k in range(1,2*self.n-2):
 					cstr.append(solver.Constraint(0,1,'No2QueensBottomUpDiag'))
@@ -213,10 +168,6 @@ class Queens:
 							l = xInd[i][j]
 							cstr[-1].SetCoefficient(x[l],1)                   
 
-        #----------------------------------------------------------------------
-        # Number of queens
-        #----------------------------------------------------------------------	
-        
 			if constraint == "NumOfQueens":
 				cstr.append(solver.Constraint(0,0,'NumOfQueens'))
 				cstr[-1].SetCoefficient(numOfQueens,-1)
@@ -225,26 +176,14 @@ class Queens:
 						k = xInd[i][j]
 						cstr[-1].SetCoefficient(x[k],1)
         
-        #--------------------------------------------------------------------------
-        # Create the objective function
-        #--------------------------------------------------------------------------
-        
 		objective = solver.Objective()
 		objective.SetCoefficient(numOfQueens, 1)
 		objective.SetMaximization()
 
-        #--------------------------------------------------------------------------
-        # Solve the model
-        #--------------------------------------------------------------------------
-        
 		solver.Solve()
 
 		print('Solution:')
 		print('Objective value =', objective.Value())
-            
-        #----------------------------------------------------------------------
-        # Output solution
-        #----------------------------------------------------------------------
 
 		for i in range(self.n):
 			for j in range(self.n):
@@ -269,10 +208,6 @@ class Queens:
 					else:
 						squares.append(str(j+1) + "-" + str(i+1))
 		return squares     
-        
-	#--------------------------------------------------------------------------
-	# Queens: WriteSquares
-	#--------------------------------------------------------------------------
 
 	def WriteSquares(self,traceFile,squares):
 
@@ -294,10 +229,6 @@ class Queens:
 		fileObject.write("\n")
 		fileObject.close()
 
-	#--------------------------------------------------------------------------
-	# Queens: RunProgram
-	#--------------------------------------------------------------------------
-
 	def RunProgram(self,traceFile):
 		self.ReadInput(traceFile)
 		self.PrintInput()
@@ -306,13 +237,6 @@ class Queens:
 		squares = self.RunModel(traceFile)      
 		self.WriteSquares(traceFile,squares)         
 
-    #--------------------------------------------------------------------------
-	# Queens: Destructor
-	#--------------------------------------------------------------------------
-
 	def __del__(self):
 		print("Destructor called, queens is deleted.")
         
-###############################################################################
-# End of the code
-###############################################################################
