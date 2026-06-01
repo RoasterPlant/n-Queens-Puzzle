@@ -12,7 +12,7 @@ run RunQueens --in "C:\Projects\Queens\Problems\p001\Input.csv"
 """
 iPython
 import os
-folder = "C:\\Projects\\Queens\\PythonCode"
+folder = "C:/Projects/Queens/PythonCode"
 os.chdir(folder)
 os.getcwd()
 """
@@ -28,19 +28,17 @@ from datetime import datetime
 from shutil import copyfile
 import ntpath
 import Queens
-sys.path.insert(0, "C:\\Projects\\PythonLibrary")
-import MyLibrary
 
 numArguments = len(sys.argv)
 print ("Number of arguments =", numArguments)
 print ("Argument List:", str(sys.argv))
 argList 	= sys.argv
-fileNameIn	= argList[2]
+fileNameIn	= "Input.csv"
 
-dirName     = os.path.dirname(fileNameIn)
-fileNameOut = dirName + "\\" + "Output.csv"
-fileNameTrace = dirName + "\\" + "Trace.txt"
-fileNameConfig = dirName + "\\" + "Config.csv"
+dirName     = os.path.dirname(fileNameIn) if os.path.dirname(fileNameIn) != "" else "." 
+fileNameOut = dirName + "/" + "Output.csv"
+fileNameTrace = dirName + "/" + "Trace.txt"
+fileNameConfig = dirName + "/" + "Config.csv"
 
 print("Input file  = ", fileNameIn)
 print("Directory   = ", dirName)
@@ -75,6 +73,7 @@ if __name__ == '__main__':
     # destruct the object queens
     print("Calling the destructor")
     del queens
+    
                         
 ###############################################################################
 # End of code
