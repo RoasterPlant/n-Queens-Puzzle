@@ -28,23 +28,47 @@ from datetime import datetime
 from shutil import copyfile
 import ntpath
 import Queens
+import platform
 
-numArguments = len(sys.argv)
-print ("Number of arguments =", numArguments)
-print ("Argument List:", str(sys.argv))
-argList 	= sys.argv
-fileNameIn	= "Input.csv"
+os_name = platform.system()
+print(f"Operating System: {os_name}")
 
-dirName     = os.path.dirname(fileNameIn) if os.path.dirname(fileNameIn) != "" else "." 
-fileNameOut = dirName + "/" + "Output.csv"
-fileNameTrace = dirName + "/" + "Trace.txt"
-fileNameConfig = dirName + "/" + "Config.csv"
+if os_name == "Windows":
+    sys.path.insert(0, "C:\\Projects\\PythonLibrary")
+    numArguments = len(sys.argv)
+    print ("Number of arguments =", numArguments)
+    print ("Argument List:", str(sys.argv))
+    argList 	= sys.argv
+    fileNameIn	= argList[2]
 
-print("Input file  = ", fileNameIn)
-print("Directory   = ", dirName)
-print("Output file = ", fileNameOut)
-print("Trace file = " , fileNameTrace)
-print("Config file = ", fileNameConfig)
+    dirName     = os.path.dirname(fileNameIn)
+    fileNameOut = dirName + "\\" + "Output.csv"
+    fileNameTrace = dirName + "\\" + "Trace.txt"
+    fileNameConfig = dirName + "\\" + "Config.csv"
+
+    print("Input file  = ", fileNameIn)
+    print("Directory   = ", dirName)
+    print("Output file = ", fileNameOut)
+    print("Trace file = " , fileNameTrace)
+    print("Config file = ", fileNameConfig)
+    
+elif os_name == "Linux":
+    numArguments = len(sys.argv)
+    print ("Number of arguments =", numArguments)
+    print ("Argument List:", str(sys.argv))
+    argList 	= sys.argv
+    fileNameIn	= "Input.csv"
+
+    dirName     = os.path.dirname(fileNameIn) if os.path.dirname(fileNameIn) != "" else "." 
+    fileNameOut = dirName + "/" + "Output.csv"
+    fileNameTrace = dirName + "/" + "Trace.txt"
+    fileNameConfig = dirName + "/" + "Config.csv"
+
+    print("Input file  = ", fileNameIn)
+    print("Directory   = ", dirName)
+    print("Output file = ", fileNameOut)
+    print("Trace file = " , fileNameTrace)
+    print("Config file = ", fileNameConfig)
 
 # open trace file
 # '+' sign means it will create a new file if it does not exist.
